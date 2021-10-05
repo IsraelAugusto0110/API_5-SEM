@@ -14,6 +14,7 @@ import ImgLogo from '../../../assets/Logo.png'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CredentialsContext } from '../../context/credentials';
 
+
 const Profile = () => {
 
     const { storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
@@ -23,6 +24,8 @@ const Profile = () => {
         AsyncStorage.removeItem('bycarCredentials')
             .then(async () => {
                 setStoredCredentials('')
+                const result = await kitty.endSession()
+                console.log(result)
             })
             .catch(error => console.log(error))
     }

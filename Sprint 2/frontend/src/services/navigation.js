@@ -9,6 +9,7 @@ import CodeValidation from '../screens/ChangePassword/CodeValidation';
 import BottomTab from '../components/BottomTab';
 import Details from '../screens/Search/Details';
 import ChatRoom from '../screens/Chat/ChatRoom';
+import Chat from '../screens/Chat';
 import Messages from '../screens/Chat/Messages';
 
 

@@ -5,6 +5,7 @@ import Home from '../../screens/Home';
 import Profile from '../../screens/Profile';
 import Search from '../../screens/Search';
 import Ads from '../../screens/Ads';
+import Chat from '../../screens/Chat';
 import ChatRoom from '../../screens/Chat/ChatRoom';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../styles';

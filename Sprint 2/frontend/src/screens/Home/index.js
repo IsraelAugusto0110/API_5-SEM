@@ -14,62 +14,42 @@ import { CredentialsContext } from '../../context/credentials';
 import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../../services/api';
 import { View, Text } from 'react-native'
-import mime from "mime";
 
 const Home = () => {
-    const headers = { "Access-Control-Allow-Origin": "*" }
+
     const [message, setMessage] = useState();
     const [messageType, setMessageType] = useState();
     const { storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
     const adm = true
     const { name, email } = storedCredentials;
     const [doc, setDoc] = useState('');
-    let formdata = new FormData;
 
-    const openLibrary = async() => {
-        try {
-        const file = await DocumentPicker.getDocumentAsync({
-          copyToCacheDirectory: true,
-          multiple: false,
-          type: '*/*'
-        });
-  
-        if (file.type === "success") {
-          console.log(file);
-          let formdata = new FormData;
-          formdata.append('file',file)
-          console.log(formdata)
-          uploadFile(file)
-        }
-  
-      } catch (err) {
-        // Expo didn't build with iCloud, expo turtle fallback
-        console.log("error", err);
-  
-      }
+    const openLibrary = async () => {
+        setMessage(null)
+        setDoc(null)
+        const response = await DocumentPicker.getDocumentAsync()
+        if (response.type === 'success') {
+            setDoc(response.name)
+            console.log(response)
+            let formdata = new FormData;
+            formdata.append('file', response)
+            api
+                .post(`/bycar/upload`, formdata)
+                .then((response) => {
+                    const { message, status, data } = response;
+                    if (data.upload === 'FAILED') {
+                        handleMessage('Arquivo Inválido');
+                    }
+                    else {
+                        handleMessage('Upload Concluído', 'SUCCESS');
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                    handleMessage('Ocorreu um erro. Verifique sua internet e tente novamente')
+                })
+        };
     }
-    
-
-
-    function uploadFile(formdata) {
-        
-        api
-            .post(`/create`, {'file':formdata.name, 'path':formdata.uri}, { headers: headers })
-            .then((response) => {
-                const { message, status, data } = response;
-                if (data.upload === 'FAILED') {
-                    handleMessage('Arquivo Inválido');
-                }
-                else {
-                    handleMessage('Upload Concluído', 'SUCCESS');
-                }
-            })
-            .catch(error => {
-                console.log(error)
-                handleMessage('Ocorreu um erro. Verifique sua internet e tente novamente')
-            })
-    }
-
 
     const handleMessage = (message, type = 'FAILED') => {
         setMessage(message);
@@ -95,7 +75,7 @@ const Home = () => {
                             ) :
                             (
                                 <Button
-                                    onPress={async () => await openLibrary()}>
+                                    onPress={openLibrary}>
                                     <ButtonText>
                                         UPLOAD ANUNCIOS
                                     </ButtonText>
@@ -104,12 +84,6 @@ const Home = () => {
 
                         <Text>Arquivo: {doc}</Text>
                         <MsgBox type={messageType} >{message}</MsgBox>
-                        <Button
-                            onPress={()=>uploadFile(formdata)}>
-                            <ButtonText>
-                                Enviar
-                            </ButtonText>
-                        </Button>
                     </View>
                 </InnerContainer>
             </Container>

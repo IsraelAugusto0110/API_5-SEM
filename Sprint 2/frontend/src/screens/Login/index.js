@@ -24,6 +24,7 @@ import KeyboardAvoidingWrapper from '../../components/KeyboardAvoidingWrapper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CredentialsContext } from '../../context/credentials';
 
+
 const Login = ({ navigation }) => {
 
     const [hidePassword, setHidePassword] = useState(true);

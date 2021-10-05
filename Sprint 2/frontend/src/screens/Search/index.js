@@ -96,7 +96,7 @@ const Home = ({ navigation }) => {
                     id_user: 2,
                     id_ad: 1,
                     name: "Voyage",
-                    by: "Daniel Fortunato",
+                    by: "Rogério Fortunato",
                     price: "R$12340",
                     color: "",
                     model: "Modern",

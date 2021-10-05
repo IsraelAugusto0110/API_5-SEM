@@ -56,6 +56,9 @@ const ChatRoom = ({ navigation }) => {
                 <View style={styles.header}>
                   <Text style={styles.nameText}>{item.name}</Text>
                 </View>
+                <Text style={styles.contentText}>
+                  {item.latestMessage.text.slice(0, 90)}
+                </Text>
               </View>
             </View>
           </TouchableOpacity>

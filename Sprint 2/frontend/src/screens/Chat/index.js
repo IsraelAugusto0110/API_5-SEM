@@ -1,3 +1,32 @@
+// import React, { useContext } from 'react'
+
+// import KeyboardAvoidingWrapper from '../../components/KeyboardAvoidingWrapper';
+// import {
+//     Container,
+//     InnerContainer,
+//     PageTitle
+// } from '../../components/styles';
+// import { StatusBar } from 'expo-status-bar';
+// import { CredentialsContext } from '../../context/credentials';
+
+// const Chat = () => {
+
+//     const { storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
+//     const { name, email } = storedCredentials;
+
+//     return (
+//         <KeyboardAvoidingWrapper>
+//             <Container>
+//                 <StatusBar style='dark' />
+//                 <InnerContainer>
+//                     <PageTitle>Chat</PageTitle>
+//                 </InnerContainer>
+//             </Container>
+//         </KeyboardAvoidingWrapper>
+//     )
+// }
+
+// export default Chat;
 
 
 import { useIsFocused } from '@react-navigation/native';
@@ -9,6 +38,7 @@ import KeyboardAvoidingWrapper from '../../components/KeyboardAvoidingWrapper';
 import { Container, InnerContainer, PageTitle } from '../../components/styles';
 
 
+
 const Chat = ({ navigation }) => {
     const [channels, setChannels] = useState([]);
     //Variavel de sair do canal
@@ -18,7 +48,11 @@ const Chat = ({ navigation }) => {
     useEffect(() => {
         let isCancelled = false;
 
-        
+        kitty.getChannels({ filter: { joined: true } }).then((result) => {
+            if (!isCancelled) {
+                setChannels(result.paginator.items);
+            }
+        });
 
         return () => {
             isCancelled = true;
