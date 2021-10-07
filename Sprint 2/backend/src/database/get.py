@@ -44,10 +44,10 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-$ virtualenv -p python3 venv
+""" $ virtualenv -p python3 venv
 $ source venv/bin/activate
 
 (venv)$ pip install Flask-PyMongo
 
 (venv)$ python mongo.py
- * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit) """
