@@ -2,21 +2,24 @@ import styled from "styled-components/native";
 import { View, Image, Text, TextInput, TouchableOpacity } from 'react-native';
 import Constants from "expo-constants";
 
+
 const StatusBarHeight = Constants.statusBarHeight;
 
 export const Colors = {
     primary: '#fff',
-    secondary: '#3F37C9'
+    secondary: '#3F37C9',
+    tertiary: '#000000',
 };
 
-const { primary, secondary } = Colors;
+const { primary, secondary, tertiary } = Colors;
 
 export const Container = styled.View`
-    flex: 1;
-    padding: 25px;
-    padding-top: ${StatusBarHeight + 30}px;
-    background-color: ${primary};
-    background: ${primary};
+
+flex: 1;
+padding: 25px;
+padding-top: ${StatusBarHeight + 30}px;
+background-color: ${primary};
+background: ${primary};
 `;
 
 export const InnerContainer = styled.View`
@@ -64,7 +67,25 @@ export const StyledTextInput = styled.TextInput`
     color: black;
 `;
 
+export const StyledTextInputSearch = styled.TextInput`
+    padding: 15px;
+    border: solid 1px ${tertiary};
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 5px;
+    font-size: 16px;
+    height: 30px;
+    margin-top: 3px;
+    margin-bottom: 10px;
+    color: black;
+`;
+
 export const InputLabel = styled.Text`
+    font-size: 13px;
+    text-align: left;
+`;
+
+export const InputLabelSearch = styled.TextInput`
     font-size: 13px;
     text-align: left;
 `;
@@ -72,6 +93,13 @@ export const InputLabel = styled.Text`
 export const RightIcon = styled.TouchableOpacity`
     right: 15px;
     top: 33px;
+    position: absolute;
+    z-index: 1;
+`;
+
+export const RightIconSearch = styled.TouchableOpacity`
+    right: 15px;
+    top: 22px;
     position: absolute;
     z-index: 1;
 `;
@@ -113,7 +141,7 @@ export const ExtraView = styled.View`
 `;
 
 export const ExtraText = styled.Text`
-    justify-content: center;
+    justify-content: space-around;
     align-content: center;
     color: black;
     font-size: 15px;
@@ -133,4 +161,33 @@ export const TextLinkContent = styled.Text`
 export const StyledText = styled.Text`
     margin: 15px;
     text-align: justify;
+`;
+
+export const Input = styled.TouchableOpacity`
+
+padding: 15px;
+background-color: ${secondary};
+justify-content: center;
+border-radius: 5px;
+margin-top: 5px;
+align-items: center;
+height: 50px;
+
+`;
+
+
+export const InputSub = styled.TouchableOpacity`
+
+padding: 15px;
+background-color: ${secondary};
+justify-content: center;
+border-radius: 5px;
+margin-top: 5px;
+align-items: center;
+height: 50px;
+
+`;
+
+export const Form = styled.View`
+width: 90%;
 `;

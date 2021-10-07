@@ -1,154 +1,234 @@
-import React, { useContext, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { StatusBar } from "expo-status-bar";
 import {
-    PageTitle
-} from '../../components/styles';
-import { StatusBar } from 'expo-status-bar';
-import { CredentialsContext } from '../../context/credentials';
-import { Text, ScrollView } from 'react-native';
-import {
-    BasicContainer,
-    ItemsView,
-    Item,
-    ItemImage,
-    ItemTitle,
-    ItemText
-} from '../../components/style';
+  Button,
+  View,
+  SafeAreaView,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Modal,
+} from "react-native";
 
+import {
+  BasicContainer,
+  Item,
+  ItemImage,
+  ItemTitle,
+  Container,
+  ItemText,
+  ContainerInfo,
+  ContainerAnuncio,
+} from "../../components/style";
+import { SubTitle } from "../../components/styles";
+import SearchInput from "../../components/Input/searchInput";
+import { FlatList } from "react-native";
+//import anuncios from "../../data/anuncios";
+import { api } from "../../services/api";
+
+const listTab = [
+  {
+    status: "All",
+  },
+  {
+    status: "Preto",
+  },
+  {
+    status: "Verde",
+  },
+];
+
+const marcaList = [
+  {
+    status: "All",
+  },
+  {
+    status: "Volkswagen",
+  },
+  {
+    status: "Chevrolet",
+  },
+];
 
 const Home = ({ navigation }) => {
+  const [searchText, setSearchText] = useState("");
+  const [list, setList] = useState();
+  const [status, setStatus] = useState("All");
+  const [marca, setMarca] = useState("All");
 
-    const { storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
-    const { name, email } = storedCredentials;
+  
+  const setStatusFilter = (status) => {
+    if (status !== "All") {
+      setList([...list.filter((e) => e.color === status)]);
+    } else {
+      setList(list);
+    }
+    setStatus(status);
+  };
 
-    const showDetails = (item) => {
-        navigation.navigate("Details", { ...item });
-    };
+  const setMarcaFilter = (status) => {
+    if (status !== "All") {
+      setList([...list.filter((e) => e.list === status)]);
+    } else {
+      setList(list);
+    }
+    setMarca(status);
+  };
 
-    const shopData = [
-        {
-            items: [
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Corsa Classic",
-                    by: "João da Silva",
-                    price: "R$12240",
-                    color: "Preto",
-                    model: "Corsa",
-                    year: "2000",
-                    img: require("./../../../assets/img1.jpg"),
-                    description:
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus sunt natus nam nemo at harum asperiores possimus laborum non.",
-                },
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Opala",
-                    by: "Arthur Braga",
-                    price: "R$16950",
-                    color: "Verde",
-                    model: "Opala",
-                    year: "1980",
-                    img: require("./../../../assets/tune.jpg"),
-                    description:
-                        "Sound absorption is a key concept in room acoustics, which may not often be considered in furniture design.",
-                },
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Celta",
-                    by: "Luciana Medeiros",
-                    price: "R$12340",
-                    color: "Vermelho",
-                    model: "Celta",
-                    year: "2000",
-                    img: require("./../../../assets/img2.jpg"),
-                    description:
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus sunt natus nam nemo at harum asperiores possimus laborum non.",
-                },
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Ford Ka",
-                    by: "Robson Oliveira",
-                    price: "R$12340",
-                    color: "Azul",
-                    model: "Ka",
-                    year: "2000",
-                    img: require("./../../../assets/img3.jpg"),
-                    description:
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus sunt natus nam nemo at harum asperiores possimus laborum non.",
-                },
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Uno",
-                    by: "Adriana Rossi",
-                    price: "R$12340",
-                    color: "Azul Marinho",
-                    model: "Uno",
-                    year: "2000",
-                    img: require("./../../../assets/img4.jpg"),
-                    description:
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus sunt natus nam nemo at harum asperiores possimus laborum non.",
-                },
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Voyage",
-                    by: "Rogério Fortunato",
-                    price: "R$12340",
-                    color: "",
-                    model: "Modern",
-                    year: "2000",
-                    img: require("./../../../assets/img5.jpg"),
-                    description:
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus sunt natus nam nemo at harum asperiores possimus laborum non.",
-                },
-                {
-                    id_user: 2,
-                    id_ad: 1,
-                    name: "Palio",
-                    by: "Abigail dos Santos",
-                    price: "R$12340",
-                    color: "Prata",
-                    model: "Weekend",
-                    year: "2000",
-                    img: require("./../../../assets/img6.jpg"),
-                    description:
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus sunt natus nam nemo at harum asperiores possimus laborum non.",
-                },
-            ],
-        },
-    ];
+  const showDetails = (item) => {
+    navigation.navigate("Details", { ...item });
+  };
 
-    return (
-        <BasicContainer>
-            <StatusBar style='dark' />
-            <ScrollView>
-                <PageTitle>Busca</PageTitle>
-                <ItemsView>
-                    {shopData[0].items.length !== 0 &&
-                        shopData[0].items.map((item, index) => {
-                            return (
-                                <Item
-                                    onPress={() => showDetails(item)}
-                                    key={index}
-                                >
-                                    <ItemImage source={item.img} />
-                                    <ItemTitle>{item.name}</ItemTitle>
-                                    <ItemText>por {item.by}</ItemText>
-                                </Item>
-                            );
-                        })}
-                    {!shopData[0].items.length && (
-                        <Text>Sem anúncios no momento</Text>
-                    )}
-                </ItemsView>
-            </ScrollView>
-        </BasicContainer>
+  useEffect(() => {
+    if (searchText === "") {
+      setList(list);
+    } else {
+      setList(
+        list.filter(
+          (item) =>
+            item.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+        )
+      );
+    }
+  }, [searchText]);
 
-    );
-}
+  const getAnuncios = async () => {
+    const res = await fetch(`http://127.0.0.1:5000/anuncios`)
+    const anuncios = await res.json();
+    setList(anuncios)
+  }
+
+  
+  useEffect(() => {
+    getAnuncios();
+  })
+  
+  return (
+    <BasicContainer>
+      <StatusBar style="dark" />
+      <ScrollView>
+        <SearchInput
+          value={searchText}
+          onChangeText={(t) => setSearchText(t)}
+          placeholder="Pesquisar"
+          
+        />
+       
+  
+
+        <SafeAreaView style={styles.container}>
+          <View style={styles.listTab}>
+            {listTab.map((e) => (
+              <TouchableOpacity
+                onPress={() => setStatusFilter(e.status)}
+                style={[
+                  styles.btnTab,
+                  status === e.status && styles.btnTabActive,
+                ]}
+              >
+                <Text
+                  style={
+                    (styles.textTab,
+                    status === e.status && styles.textTabActive)
+                  }
+                >
+                  {e.status}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </SafeAreaView>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.listTab}>
+            {marcaList.map((e) => (
+              <TouchableOpacity
+                onPress={() => setMarcaFilter(e.status)}
+                style={[
+                  styles.btnTab2,
+                  marca === e.status && styles.btnTabActive2,
+                ]}
+              >
+                <Text
+                  style={
+                    (styles.textTab2,
+                    marca === e.status && styles.textTabActive2)
+                  }
+                >
+                  {e.status}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </SafeAreaView>
+
+        <SubTitle>Resultados...</SubTitle>
+
+        <FlatList
+          data={list}
+          renderItem={({ item }) => (
+            <Item onPress={() => showDetails(item)} key={item.id_user}>
+              <ContainerInfo>
+                <ItemTitle>{item.name}</ItemTitle>
+              </ContainerInfo>
+              <ItemImage source={item.img} />
+              <ContainerAnuncio>
+                <ItemText>por {item.by}</ItemText>
+              </ContainerAnuncio>
+            </Item>
+          )}
+        />
+      </ScrollView>
+    </BasicContainer>
+  );
+};
 
 export default Home;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 10,
+    justifyContent: "center",
+  },
+  listTab: {
+    flexDirection: "row",
+    marginTop: "20px",
+    marginBottom: 20,
+  },
+  btnTab: {
+    width: Dimensions.get("window").width / 3.8,
+    flexDirection: "row",
+    borderWidth: 0.5,
+    borderColor: "#EBEBEB",
+    padding: 10,
+    justifyContent: "center",
+  },
+  btnTab2: {
+    width: Dimensions.get("window").width / 3.8,
+    flexDirection: "row",
+    borderWidth: 0.5,
+    borderColor: "#EBEBEB",
+    padding: 10,
+    justifyContent: "center",
+  },
+  textTab: {
+    fontSize: 16,
+  },
+  textTab2: {
+    fontSize: 16,
+  },
+  btnTabActive: {
+    backgroundColor: "#3F37C9",
+  },
+  textTabActive: {
+    color: "#fff",
+  },
+  btnTabActive2: {
+    backgroundColor: "#3F37C9",
+  },
+  textTabActive2: {
+    color: "#fff",
+  },
+});
