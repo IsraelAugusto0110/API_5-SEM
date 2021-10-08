@@ -2,14 +2,20 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_pymongo import PyMongo, ObjectId
 from flask_cors import CORS
 import os
+from pymongo import MongoClient
+import pandas as pd
 
 DIRETORIO = "C:\\Users\\Pedro\\Documents\\API-5semestre-main\\frontend\\teste"
 
 app = Flask(__name__)
-app.config['MONGO_URI']='mongodb://localhost/pythonreactdb'
-mongo = PyMongo(app)
-CORS(app)
-db = mongo.db.anuncios
+
+#conectando DB
+client =  MongoClient("mongodb+srv://jsoeiro:1234@bycardb.lrp4p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+print('conectado com o banco')
+db = client['dbycar']
+collection = db['usuarios']
+
+
 
 @app.route('/anuncios', methods=['POST'])
 def createAnuncio():
