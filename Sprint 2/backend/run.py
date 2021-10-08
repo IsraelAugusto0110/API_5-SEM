@@ -1,5 +1,4 @@
 from flask import Flask
-from src.controllers.envio_email import Email
 import pandas as pd
 from bson.json_util import dumps
 import random
@@ -13,27 +12,7 @@ from flask_pymongo import PyMongo
 app = Flask(__name__)
 
 app.config['MONGO_URI'] = 'mongodb+srv://jsoeiro:1234@bycardb.lrp4p.mongodb.net/dbycar' #conexao com o mongo 
-
 mongo = PyMongo(app)
-#df = pd.read_csv(f'/path/{filename}rawdata.csv/')
-df = pd.read_csv(r'C:\Users\jodan\Documents\usuarios02.csv') #usuario
-
-cod = 6
-x=0
-df['id'] = 0
-df['senha'] = 0
-df['status'] = 0
-df['cod'] = 0
-df['atividade'] = 1
-
-data = df.to_dict(orient="records")
-
-while x < (len(data)):
-
-    data[x]['id'] = mongo.db.usuarios.count()
-    data[x]['senha'] = ''.join(random.choice(string.digits) for x in range(cod))
-    mongo.db.usuarios.insert_one(data[x])
-    x+=1
 
 class Cadastro:    
     def sender_email(email, senha):
@@ -79,15 +58,39 @@ class Cadastro:
         server.sendmail(FROM, TO, BODY)
         print("Email enviado para", TO)
         server.quit()
+        
+arquivo = request.files['arquivo']     
+df = pd.read_csv(arquivo)
+data = df.to_dict(orient="records")
+cod = 6
 
-b=0
+df['id'] = 0
+df['senha'] = 0
+df['status'] = 0
+df['cod'] = 0
+df['atividade'] = 1
+df.reset_index(inplace=True)
+        
+@app.route('/create/user', methods=['POST'])
+def create():
+    if 'arquivo' in request.files:
+        x=0
+        df = pd.DataFrame(data)
+        
+        while x < (len(data)):
+            data[x]['id'] = mongo.db.usuarios.count()
+            data[x]['senha'] = ''.join(random.choice(string.digits) for x in range(cod))
+            mongo.db.usuarios.insert_one(data[x])
+            x+=1       
+    return 'Arquivo enviado com sucesso!'
+
+b = 0
 while b < (len(data)):
     email = data[b]['email']
     senha = data[b]['senha']
     b+=1
     Cadastro.sender_email(email, senha)
-
-
+    
 #lista todos os usuarios
 @app.route('/listar/usuarios', methods = ["GET"])
 def users():
@@ -164,13 +167,15 @@ def update_senha(id):
     resp = jsonify("senha atualizada com sucesso")
     return resp
 
+
 #esqueceu a senha
 @app.route('/redefinesenha', methods = ["POST"])
 def redefine_senha():
 
     _json = request.json
     _email = _json['email']
-    
+
+    cod = 6 
     find_user = mongo.db.usuarios.find({'email' : _email})
     not_found = jsonify("usuario não existe")
     resp = dumps(find_user)
@@ -181,6 +186,67 @@ def redefine_senha():
         return resp
     else:
         return not_found
+
+#--------------------------------------------anuncio-----------------------------------------------------#
+anuncio = request.files['anuncio']     
+dfa = pd.read_csv(anuncio)
+data_anuncio = df.to_dict(orient="records")
+z=0
+df['id'] = 0
+
+@app.route('/create/anuncio', methods=['POST'])
+def create_anuncio():
+    if 'anuncio' in request.files:
+        x=0
+        df = pd.DataFrame(data) 
+        while z < (len(data)):
+            data_anuncio[z]['id'] = mongo.db.anuncios.count()
+            mongo.db.anuncios.insert_one(data_anuncio[x])
+            x+=1     
+    return 'Arquivo enviado com sucesso!'
+
+#lista todos os anuncios
+@app.route('/listar/anuncios', methods = ["GET"])
+def lista_anuncio():
+    anuncios = mongo.db.anuncios.find({})
+    resp = dumps(anuncios)
+    return resp
+
+#lista anuncio por cpf do usuario
+@app.route('/listar/anuncio/<id>', methods = ["GET"])
+def anuncio(cpf):
+    anuncios = mongo.db.anuncios.find({'cpf_anunciante':int(cpf)})
+    resp = dumps(anuncios)
+    return resp
+
+#exclui anuncio
+@app.route('/anuncios/<id>', methods=['DELETE'])
+def deleteAnuncios(id):
+    mongo.db.delete_one({'id':int(id)})
+    return jsonify({'message': 'Anuncio excluido'})
+
+@app.route('/atualizar/anuncio/<id>', methods=["PUT"])
+def update_anuncio(id):
+    _json = request.json
+    _fabricante = _json['fabricante']
+    _desc_marca = _json['desc_marca']
+    _desc_veiculo = _json['desc_veiculo']
+    _cod_anunciante = _json['cod_anunciante']
+    _ano_fabricacao = _json['ano_fabricacao']
+    _ano_modelo = _json['ano_modelo']
+    _cpf_anunciante = _json['cpf_anunciante']
+    _valor_veiculo = _json['valor_veiculo']
+
+    mongo.db.usuarios.find_one_and_update(
+        {'id':int(id)}, {"$set":{
+                                'fabricante' : _fabricante,
+                                'desc_marca': _desc_marca, 
+                                'desc_veiculo': _desc_veiculo,
+                                'cod_anunciante': _cod_anunciante,
+                                'ano_fabricacao': _ano_fabricacao,
+                                'ano_modelo': _ano_modelo,
+                                'cpf_anunciante': _cpf_anunciante,
+                                'valor_veiculo': _valor_veiculo}})
 
 
 if __name__ == "__main__":
