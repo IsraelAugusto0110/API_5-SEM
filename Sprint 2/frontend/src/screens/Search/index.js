@@ -100,7 +100,6 @@ const Home = ({ navigation }) => {
     setList(anuncios)
   }
 
-  
   useEffect(() => {
     getAnuncios();
   })
