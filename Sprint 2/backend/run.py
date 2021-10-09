@@ -58,38 +58,40 @@ class Cadastro:
         server.sendmail(FROM, TO, BODY)
         print("Email enviado para", TO)
         server.quit()
-        
-arquivo = request.files['arquivo']     
-df = pd.read_csv(arquivo)
-data = df.to_dict(orient="records")
-cod = 6
 
-df['id'] = 0
-df['senha'] = 0
-df['status'] = 0
-df['cod'] = 0
-df['atividade'] = 1
-df.reset_index(inplace=True)
+        
+data = 1
         
 @app.route('/create/user', methods=['POST'])
 def create():
-    if 'arquivo' in request.files:
+    if 'arq_do_cara' in request.files: 
+        arquivo = request.files['arq_do_cara']     
+        df = pd.read_csv(arquivo)
+        data = df.to_dict(orient="records")
+        cod = 6
+
+        df['id'] = 0
+        df['senha'] = 0
+        df['status'] = 0
+        df['cod'] = 0
+        df['atividade'] = 1
+        df.reset_index(inplace=True)
         x=0
         df = pd.DataFrame(data)
-        
         while x < (len(data)):
             data[x]['id'] = mongo.db.usuarios.count()
             data[x]['senha'] = ''.join(random.choice(string.digits) for x in range(cod))
             mongo.db.usuarios.insert_one(data[x])
             x+=1       
-    return 'Arquivo enviado com sucesso!'
+            b = 0
+        while b < (len(data)):
+            email = data[b]['email']
+            senha = data[b]['senha']
+            b+=1
+            Cadastro.sender_email(email, senha)
+            return 'Arquivo enviado com sucesso!'
 
-b = 0
-while b < (len(data)):
-    email = data[b]['email']
-    senha = data[b]['senha']
-    b+=1
-    Cadastro.sender_email(email, senha)
+
     
 #lista todos os usuarios
 @app.route('/listar/usuarios', methods = ["GET"])
@@ -188,17 +190,18 @@ def redefine_senha():
         return not_found
 
 #--------------------------------------------anuncio-----------------------------------------------------#
-anuncio = request.files['anuncio']     
-dfa = pd.read_csv(anuncio)
-data_anuncio = df.to_dict(orient="records")
-z=0
-df['id'] = 0
+
 
 @app.route('/create/anuncio', methods=['POST'])
 def create_anuncio():
     if 'anuncio' in request.files:
+        anuncio = request.files['anuncio']     
+        dfa = pd.read_csv(anuncio)
+        data_anuncio = dfa.to_dict(orient="records")
+        z=0
+        dfa['id'] = 0
         x=0
-        df = pd.DataFrame(data) 
+        dfa = pd.DataFrame(data) 
         while z < (len(data)):
             data_anuncio[z]['id'] = mongo.db.anuncios.count()
             mongo.db.anuncios.insert_one(data_anuncio[x])
@@ -250,4 +253,4 @@ def update_anuncio(id):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='127.0.0.1', port=8080, debug=True)
