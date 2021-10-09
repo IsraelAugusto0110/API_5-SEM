@@ -6,13 +6,20 @@ import string
 from flask import jsonify, request
 import smtplib
 from flask import Flask, request
-from flask_pymongo import PyMongo
+from flask_pymongo import PyMongo, ObjectId
+from flask_cors import CORS
+import json
+import datetime
+
+date_handler = lambda obj: (obj.isoformat() if isinstance(obj, (datetime.datetime, datetime.date, datetime.time))else None)
 
 
 app = Flask(__name__)
 
 app.config['MONGO_URI'] = 'mongodb+srv://jsoeiro:1234@bycardb.lrp4p.mongodb.net/dbycar' #conexao com o mongo 
 mongo = PyMongo(app)
+CORS(app)
+
 
 class Cadastro:    
     def sender_email(email, senha):
@@ -197,13 +204,14 @@ def create_anuncio():
     if 'anuncio' in request.files:
         anuncio = request.files['anuncio']     
         dfa = pd.read_csv(anuncio)
-        data_anuncio = dfa.to_dict(orient="records")
-        z=0
-        dfa['id'] = 0
+        data_anuncio = dfa.to_dict(orient="records")  
+        dfa['id'] = 0 
+        dfa['img'] = 'https://quatrorodas.abril.com.br/wp-content/uploads/2021/04/Corsa-Wind-modelo-1997-da-Chevrolet._1-C%C3%B3pia.jpg?resize=1536,1023'
         x=0
-        dfa = pd.DataFrame(data) 
-        while z < (len(data)):
-            data_anuncio[z]['id'] = mongo.db.anuncios.count()
+        dfa = pd.DataFrame(data_anuncio) 
+        while x < (len(data_anuncio)):
+            data_anuncio[x]['id'] = mongo.db.anuncios.count()
+            data_anuncio[x]['img'] = 'https://quatrorodas.abril.com.br/wp-content/uploads/2021/04/Corsa-Wind-modelo-1997-da-Chevrolet._1-C%C3%B3pia.jpg?resize=1536,1023'
             mongo.db.anuncios.insert_one(data_anuncio[x])
             x+=1     
     return 'Arquivo enviado com sucesso!'
@@ -211,46 +219,90 @@ def create_anuncio():
 #lista todos os anuncios
 @app.route('/listar/anuncios', methods = ["GET"])
 def lista_anuncio():
-    anuncios = mongo.db.anuncios.find({})
-    resp = dumps(anuncios)
-    return resp
+    anuncios = []
+    for doc in mongo.db.anuncios.find():
+        anuncios.append({
+            '_id': str(ObjectId(doc['_id'])),
+            'fabricante': doc['fabricante'],
+            'desc_marca': doc['desc_marca'],
+            'desc_veiculo': doc['desc_veiculo'],
+            'cod_anunciante': doc['cod_anunciante'],
+            'ano_fabricacao': doc['ano_fabricacao'],
+            'ano_modelo': doc['ano_modelo'],
+            'cpf_anunciante': doc['cpf_anunciante'],
+            'valor_veiculo': doc['valor_veiculo'],
+            'id': doc['id'],
+            'img': doc['img']
+        })
+    return jsonify(anuncios)
 
 #lista anuncio por cpf do usuario
-@app.route('/listar/anuncio/<id>', methods = ["GET"])
-def anuncio(cpf):
-    anuncios = mongo.db.anuncios.find({'cpf_anunciante':int(cpf)})
-    resp = dumps(anuncios)
-    return resp
+@app.route('/listar/anuncio/<cpf_anunciante>', methods = ["GET"])
+def anuncio(cpf_anunciante):
+    anuncios = mongo.db.anuncios.find_one({'cpf_anunciante':int(cpf_anunciante)})
+    return jsonify({ 
+      '_id': str(ObjectId(anuncios['_id'])),
+      'fabricante' : anuncios['fabricante'],
+      'desc_marca': anuncios['desc_marca'], 
+      'desc_veiculo': anuncios['desc_veiculo'],
+      'cod_anunciante': anuncios['cod_anunciante'],
+      'ano_fabricacao': anuncios['ano_fabricacao'],
+      'ano_modelo': anuncios[ 'ano_modelo'],
+      'cpf_anunciante': anuncios['cpf_anunciante'],
+      'valor_veiculo': anuncios['valor_veiculo'],
+      'id': anuncios['id'],
+      'img': anuncios['img']
+  })
+  
+#Lista anuncio especifico
+@app.route('/anuncio/<id>', methods=['GET'])
+def getAnuncio(id):
+  anuncio = mongo.db.anuncios.find_one({'id': int(id)})
+  return jsonify({
+     '_id': str(ObjectId(anuncio['_id'])),
+      'fabricante' : anuncio['_fabricante'],
+      'desc_marca': anuncio['_desc_marca'], 
+      'desc_veiculo': anuncio['desc_veiculo'],
+      'cod_anunciante': anuncio['cod_anunciante'],
+      'ano_fabricacao': anuncio['ano_fabricacao'],
+      'ano_modelo': anuncio[ 'ano_modelo'],
+      'cpf_anunciante': anuncio['cpf_anunciante'],
+      'valor_veiculo': anuncio['valor_veiculo']
+     
+  })
 
 #exclui anuncio
 @app.route('/anuncios/<id>', methods=['DELETE'])
 def deleteAnuncios(id):
-    mongo.db.delete_one({'id':int(id)})
-    return jsonify({'message': 'Anuncio excluido'})
+       mongo.db.anuncios.delete_one({'_id': ObjectId(id)})
+       return jsonify({'message': 'Anuncio excluido'})
 
 @app.route('/atualizar/anuncio/<id>', methods=["PUT"])
 def update_anuncio(id):
-    _json = request.json
-    _fabricante = _json['fabricante']
-    _desc_marca = _json['desc_marca']
-    _desc_veiculo = _json['desc_veiculo']
-    _cod_anunciante = _json['cod_anunciante']
-    _ano_fabricacao = _json['ano_fabricacao']
-    _ano_modelo = _json['ano_modelo']
-    _cpf_anunciante = _json['cpf_anunciante']
-    _valor_veiculo = _json['valor_veiculo']
-
-    mongo.db.usuarios.find_one_and_update(
-        {'id':int(id)}, {"$set":{
+      _json = request.json
+      _fabricante = _json['fabricante']
+      _desc_marca = _json['desc_marca']
+      _desc_veiculo = _json['desc_veiculo']
+      _cod_anunciante = _json['cod_anunciante']
+      _ano_fabricacao = _json['ano_fabricacao']
+      _ano_modelo = _json['ano_modelo']
+      _cpf_anunciante = _json['cpf_anunciante']
+      _id = _json['id'],
+      _img = _json['img'],
+      _valor_veiculo = _json['valor_veiculo']
+      mongo.db.anuncios.update_one(
+        {'id': int(id)}, {"$set":{
                                 'fabricante' : _fabricante,
                                 'desc_marca': _desc_marca, 
                                 'desc_veiculo': _desc_veiculo,
                                 'cod_anunciante': _cod_anunciante,
                                 'ano_fabricacao': _ano_fabricacao,
                                 'ano_modelo': _ano_modelo,
+                                'id': _id,
+                                'img': _img,
                                 'cpf_anunciante': _cpf_anunciante,
                                 'valor_veiculo': _valor_veiculo}})
-
+      return jsonify({'message': 'Anuncio atualizado'})
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run()
