@@ -1,60 +1,51 @@
 import React, { useContext, useState } from "react";
 import {
   Container,
-  InnerContainer,
-  PageTitle,
   SubTitle,
   Button,
   ButtonText,
-  Form,
-  Input,
-  MsgBox,
-  ContainerStyle,
-  InputSub,
 } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
-
 import { CredentialsContext } from "../../context/credentials";
-
-import { View, Text, KeyboardAvoidingView, TextInput } from "react-native";
+import { View } from "react-native";
+import Header from "../../components/header";
+import { HeadContainer } from "../../components/style";
+import ListaHorizontal from "../../components/FlatList/ListaHorizontal";
+import Anuncios from "../../data/anuncios";
 
 const Home = () => {
-  const [message, setMessage] = useState();
-  const [messageType, setMessageType] = useState();
+  const [list, setList] = useState(Anuncios);
   const { storedCredentials, setStoredCredentials } =
     useContext(CredentialsContext);
   const adm = true;
-  const { name, email } = storedCredentials;
-  const [doc, setDoc] = useState("");
+  const { name, email, cpf} = storedCredentials;
 
   return (
-    <KeyboardAvoidingView>
-      <View>
+    <HeadContainer>
+      <Header />
+      <Container>
         <StatusBar style="dark" />
-        <PageTitle>Home</PageTitle>
-        <SubTitle>Bem-Vindo, {name}</SubTitle>
+
+        <SubTitle>Bem-vindo, {cpf}</SubTitle>
         <View>
-          <form //Rota do banco python
-            action="http://127.0.0.1:5000/arquivos"
+     
+        <form //Rota do banco python
+            action="http://127.0.0.1:5000/create/anuncio"
             method="POST"
             encType="multipart/form-data"
           >
-            <input type="file" id="meuArquivo" name="meuArquivo" />
-
+            <input type="file" id="anuncio" name="anuncio" />
             <input type="submit" defaultValue="Submit" />
           </form>
+
 
           <Button>
             <ButtonText>UPLOAD ANUNCIOS</ButtonText>
           </Button>
-          <Text>Arquivo: {doc}</Text>
-          <MsgBox type={messageType}>{message}</MsgBox>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </Container>
+    </HeadContainer>
   );
 };
 
 export default Home;
-
-//

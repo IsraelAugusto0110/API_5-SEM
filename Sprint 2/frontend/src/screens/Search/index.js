@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
-  Button,
   View,
   SafeAreaView,
   Text,
@@ -9,7 +8,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Modal,
 } from "react-native";
 
 import {
@@ -17,16 +15,16 @@ import {
   Item,
   ItemImage,
   ItemTitle,
-  Container,
   ItemText,
   ContainerInfo,
   ContainerAnuncio,
+  HeadContainer,
 } from "../../components/style";
 import { SubTitle } from "../../components/styles";
 import SearchInput from "../../components/Input/searchInput";
 import { FlatList } from "react-native";
 //import anuncios from "../../data/anuncios";
-import { api } from "../../services/api";
+import Header from "../../components/header";
 
 const listTab = [
   {
@@ -58,64 +56,78 @@ const Home = ({ navigation }) => {
   const [status, setStatus] = useState("All");
   const [marca, setMarca] = useState("All");
 
-  
+  //filtro de cor 
   const setStatusFilter = (status) => {
     if (status !== "All") {
       setList([...list.filter((e) => e.color === status)]);
     } else {
       setList(list);
+      getAnuncios();
     }
     setStatus(status);
   };
 
+  //filtro marca
   const setMarcaFilter = (status) => {
     if (status !== "All") {
-      setList([...list.filter((e) => e.list === status)]);
+      setList([...list.filter((e) => e.desc_marca === status)]);
     } else {
       setList(list);
+      getAnuncios();
     }
     setMarca(status);
   };
-
+   
+  //Passando para imagem de detalhes do anuncio
   const showDetails = (item) => {
     navigation.navigate("Details", { ...item });
   };
 
+ // Filtro campo de pesquisa
   useEffect(() => {
     if (searchText === "") {
+      getAnuncios();
       setList(list);
     } else {
       setList(
         list.filter(
           (item) =>
-            item.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+            item.fabricante.toLowerCase().indexOf(searchText.toLowerCase()) > -1
         )
+      
       );
+     
     }
   }, [searchText]);
 
+
   const getAnuncios = async () => {
-    const res = await fetch(`http://127.0.0.1:5000/anuncios`)
+    const res = await fetch(`http://127.0.0.1:5000/listar/anuncios`)
     const anuncios = await res.json();
     setList(anuncios)
+
   }
 
+  
   useEffect(() => {
-    getAnuncios();
+   
   })
   
   return (
+    <HeadContainer>
+        <Header/>
     <BasicContainer>
+     
       <StatusBar style="dark" />
       <ScrollView>
+     
         <SearchInput
           value={searchText}
           onChangeText={(t) => setSearchText(t)}
           placeholder="Pesquisar"
           
         />
-       
-  
+      
 
         <SafeAreaView style={styles.container}>
           <View style={styles.listTab}>
@@ -169,17 +181,19 @@ const Home = ({ navigation }) => {
           renderItem={({ item }) => (
             <Item onPress={() => showDetails(item)} key={item.id_user}>
               <ContainerInfo>
-                <ItemTitle>{item.name}</ItemTitle>
+                <ItemTitle>{item.fabricante}</ItemTitle>
               </ContainerInfo>
               <ItemImage source={item.img} />
               <ContainerAnuncio>
-                <ItemText>por {item.by}</ItemText>
+                <ItemText>{item.desc_veiculo}</ItemText>
               </ContainerAnuncio>
             </Item>
           )}
         />
       </ScrollView>
+      
     </BasicContainer>
+    </HeadContainer>
   );
 };
 
